@@ -126,6 +126,12 @@ func init() {
 func initWithRedis(redisOpts *redis.Options, channel string, defaultKey string, cacheTime time.Duration, refreshAsync bool) {
 	DefaultRedisAsyncer = NewRedisAsyncer(redisOpts, channel)
 
+	RegisterAsyner("redis", &AsyncerArgs{
+		Ins:          DefaultRedisAsyncer,
+		CacheTime:    cacheTime,
+		RefreshAsync: refreshAsync,
+	})
+
 	if defaultKey == "" {
 		return
 	}

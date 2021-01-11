@@ -11,7 +11,6 @@ const (
 	DefaultLayerName    = "default"
 	RootKey             = ""
 	RemoteConfSourceKey = "remote_conf_source"
-	StandardPrefix      = "/conf/go"
 )
 
 var (
@@ -106,12 +105,9 @@ func AddLayer(layerName string, layer Configer) {
 	_cfg.AddLayer(layerName, layer)
 }
 
-// 获取远程配置层
-// 远程配置的默认来源可通过remoteSources指定，不指定读取默认默认中的RemoteConfSourceKey指定的value
-// 目前仅支持qconf
 func (cfg *Config) RemoteLayer(path string, remoteSources ...string) (*LayerConfigProxy, error) {
 	if _, ok := cfg.layers.Load(path); !ok {
-		remoteSource := cfg.StringDefault(RemoteConfSourceKey, "consul") // 应用配置文件中指定，远程配置服务使用:qconf/consul,默认配置使用consul
+		remoteSource := cfg.StringDefault(RemoteConfSourceKey, "redis")
 		if len(remoteSources) > 0 {
 			remoteSource = remoteSources[0]
 		}

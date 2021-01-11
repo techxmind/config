@@ -28,6 +28,8 @@ func NewRedisAsyncer(options *redis.Options, subChannel string) *RedisAsyncer {
 		a.subscribe(subChannel)
 	}
 
+	logger.Infof("NewRedisAsyncer:subChannel=%s", subChannel)
+
 	return a
 }
 
@@ -43,6 +45,7 @@ func (a *RedisAsyncer) subscribe(channel string) {
 	go func() {
 		for msg := range sub.Channel() {
 			updatedKey := msg.Payload
+			logger.Debugf("redis key updated:%s", updatedKey)
 			a.notify(updatedKey)
 		}
 	}()
