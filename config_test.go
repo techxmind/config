@@ -185,10 +185,8 @@ func TestDynamicConfFile(t *testing.T) {
 	if err != nil {
 		t.Fatalf("write conf file error: %v", err)
 	}
-	time.Sleep(11 * time.Millisecond) // expire cache
-	String("c11")                     // trigger refresh
-	for i := 0; i <= 100; i++ {       // wait async refresh completed
-		time.Sleep(50 * time.Millisecond)
+	for i := 0; i <= 10000; i++ { // wait for synchronization to complete
+		time.Sleep(10 * time.Millisecond)
 		if String("c11") == "value1.1" {
 			break
 		}
