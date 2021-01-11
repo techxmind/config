@@ -181,11 +181,12 @@ func TestDynamicConfFile(t *testing.T) {
 	"c33" : true
 }
 	`)
+	time.Sleep(1 * time.Second)
 	err = ioutil.WriteFile(confFile, confContent, fileutil.PrivateFileMode)
 	if err != nil {
 		t.Fatalf("write conf file error: %v", err)
 	}
-	for i := 0; i <= 10000; i++ { // wait for synchronization to complete
+	for i := 0; i <= 100; i++ { // wait for synchronization to complete
 		time.Sleep(10 * time.Millisecond)
 		if String("c11") == "value1.1" {
 			break
