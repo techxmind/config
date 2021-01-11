@@ -187,6 +187,11 @@ func TestDynamicConfFile(t *testing.T) {
 	}
 	time.Sleep(11 * time.Millisecond) // expire cache
 	String("c11")                     // trigger refresh
-	time.Sleep(50 * time.Millisecond) // wait refresh
+	for i := 0; i <= 100; i++ {       // wait async refresh completed
+		time.Sleep(50 * time.Millisecond)
+		if String("c11") == "value1.1" {
+			break
+		}
+	}
 	ast.Equal("value1.1", String("c11"))
 }
