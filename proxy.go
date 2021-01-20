@@ -9,7 +9,7 @@ type LayerConfigProxy struct {
 	ConfigHelper
 }
 
-func NewLayerConfigProxy(cfg *Config, layerNames ...string) *LayerConfigProxy {
+func NewLayerConfigProxy(cfg *defaultConfig, layerNames ...string) *LayerConfigProxy {
 	p := &layerConfigProxy{
 		layerNames: layerNames,
 		cfg:        cfg,
@@ -29,17 +29,17 @@ func (p *LayerConfigProxy) SetLayerNames(layerNames ...string) {
 
 type layerConfigProxy struct {
 	layerNames []string
-	cfg        *Config
+	cfg        *defaultConfig
 }
 
 func (p *layerConfigProxy) Get(keyPath string) (val interface{}) {
-	return p.cfg.Get(keyPath, p.layerNames...)
+	return p.cfg.Get2(keyPath, p.layerNames...)
 }
 
 func (p *layerConfigProxy) Set(keyPath string, value interface{}) error {
-	return p.cfg.Set(keyPath, value, p.layerNames...)
+	return p.cfg.Set2(keyPath, value, p.layerNames...)
 }
 
 func (p *layerConfigProxy) Watch(notifier chan bool) {
-	p.cfg.Watch(notifier)
+	p.cfg.Watch2(notifier, p.layerNames...)
 }

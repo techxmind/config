@@ -32,6 +32,8 @@ test config map:
 func TestConfig(t *testing.T) {
 	ast := assert.New(t)
 	cfg := newConfig()
+	//ast.Implements((*Config)(nil), cfg)
+	ast.Implements((*Configer)(nil), cfg)
 	layer1 := NewMapConfig(getTestConfigMap())
 	layer2 := NewMapConfig(getTestConfigMap())
 	layer2.Set("layer_name", "layer2")

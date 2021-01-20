@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	_cfg *Config
+	_cfg *defaultConfig
 
 	_opts = struct {
 		// Value cache time(seconds) when asyncer do not support value changed notify.
