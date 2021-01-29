@@ -28,7 +28,7 @@ func testTrimJsonComment(t *testing.T) {
 }
 }`)
 
-	jsonStr = trimJsonComment(jsonStr)
+	jsonStr = trimJsonComment(jsonStr, T_JSON)
 
 	var v1, v2 interface{}
 

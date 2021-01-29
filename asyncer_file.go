@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 	"sync"
 	"time"
 )
@@ -19,6 +20,14 @@ type FileAsyncer struct {
 
 func NewFileAsyncer() *FileAsyncer {
 	return &FileAsyncer{}
+}
+
+func (a *FileAsyncer) ContentType(file string) ContentType {
+	if strings.HasSuffix(file, ".yml") {
+		return T_YAML
+	}
+
+	return T_JSON
 }
 
 func (a *FileAsyncer) Get(file string) []byte {

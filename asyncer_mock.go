@@ -1,7 +1,7 @@
 package config
 
 import (
-	"encoding/json"
+	"strings"
 	"sync"
 	"sync/atomic"
 )
@@ -15,6 +15,14 @@ func NewMockAsyncer() *MockAsyncer {
 	return &MockAsyncer{}
 }
 
+func (a *MockAsyncer) ContentType(keyPath string) ContentType {
+	if strings.HasSuffix(keyPath, ".yml") {
+		return T_YAML
+	}
+
+	return T_JSON
+}
+
 func (a *MockAsyncer) Get(keyPath string) []byte {
 	v, ok := a.data.Load(keyPath)
 	if !ok {
@@ -24,17 +32,18 @@ func (a *MockAsyncer) Get(keyPath string) []byte {
 	vv := v.([]byte)
 
 	var m map[string]interface{}
-	err := json.Unmarshal(vv, &m)
+	mar := typeMarshalers[a.ContentType(keyPath)]
+	err := mar.Unmarshal(vv, &m)
 
 	if err != nil {
-		logger.Errorf("err:%v", err)
+		logger.Errorf("unmarshal err:%v", err)
 		return nil
 	}
 
 	atomic.AddInt32(&a.ct, 1)
 	setMapValue(m, "key", keyPath)
 	setMapValue(m, "ct", a.ct)
-	ret, _ := json.Marshal(m)
+	ret, _ := mar.Marshal(m)
 	logger.Infof("get async config[%s]:%s", keyPath, ret)
 	return ret
 }

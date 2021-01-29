@@ -13,7 +13,7 @@ var (
 )
 
 // 对原始配置内容进行处理，像解密加密文本等
-type RawMessageProcessor func([]byte) []byte
+type RawMessageProcessor func([]byte, ContentType) []byte
 
 var processors []RawMessageProcessor
 
@@ -26,19 +26,23 @@ func RegisterRawMessageProcessor(p RawMessageProcessor) {
 	processors = append(processors, p)
 }
 
-func processRawMessage(msg []byte) []byte {
+func processRawMessage(msg []byte, t ContentType) []byte {
 	if len(msg) == 0 {
 		return nil
 	}
 
 	ret := msg
 	for _, p := range processors {
-		ret = p(ret)
+		ret = p(ret, t)
 	}
 	return ret
 }
 
-func trimJsonComment(content []byte) []byte {
+func trimJsonComment(content []byte, tp ContentType) []byte {
+	if tp != T_JSON {
+		return content
+	}
+
 	s := string(content)
 	for _, r := range jsonCommentRegexps {
 		s = r.ReplaceAllString(s, "")

@@ -12,4 +12,5 @@ require (
 	github.com/techxmind/logger v0.0.0-20201230155601-cff8473d0220
 	go.uber.org/multierr v1.6.0 // indirect
 	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a
+	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
 )

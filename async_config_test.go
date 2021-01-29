@@ -37,4 +37,19 @@ func TestAsyncConfig(t *testing.T) {
 	err := cfg2.Set("custom", "custom2")
 	ast.Nil(err)
 	ast.Equal("custom2", cfg2.Get("custom"))
+
+	// test yaml
+	asyncKey = "async_key.yml"
+	ast.Equal(T_YAML, asyncer.ContentType(asyncKey))
+	asyncer.Set(asyncKey, []byte(`
+a: 1
+b:
+  c: 2
+  d: [3, 4]
+`))
+	cfg3 := NewAsyncConfig(asyncer, asyncKey, 1000*time.Millisecond, false)
+	logger.Infof("%#v", cfg3.Get(""))
+	ast.EqualValues(1, cfg3.Get("a"))
+	ast.EqualValues(2, cfg3.Get("b.c"))
+	ast.EqualValues(3, cfg3.Get("b.d.0"))
 }

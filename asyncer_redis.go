@@ -33,6 +33,12 @@ func NewRedisAsyncer(options *redis.Options, subChannel string) *RedisAsyncer {
 	return a
 }
 
+func (a *RedisAsyncer) ContentType(key string) ContentType {
+	// TODO: support yaml
+
+	return T_JSON
+}
+
 func (a *RedisAsyncer) subscribe(channel string) {
 	sub := a.db.Subscribe(a.ctx, channel)
 	_, err := sub.Receive(a.ctx)
