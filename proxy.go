@@ -40,6 +40,6 @@ func (p *layerConfigProxy) Set(keyPath string, value interface{}) error {
 	return p.cfg.Set2(keyPath, value, p.layerNames...)
 }
 
-func (p *layerConfigProxy) Watch(notifier chan bool) {
+func (p *layerConfigProxy) Watch(notifier chan struct{}) {
 	p.cfg.Watch2(notifier, p.layerNames...)
 }

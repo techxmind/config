@@ -41,7 +41,7 @@ func (c *defaultConfiger) Set(keyPath string, value interface{}) error {
 	return c.cfg.Set2(keyPath, value)
 }
 
-func (c *defaultConfiger) Watch(notifier chan bool) {
+func (c *defaultConfiger) Watch(notifier chan struct{}) {
 	c.cfg.Watch2(notifier)
 }
 
@@ -188,7 +188,7 @@ func Get(keyPath string, layerNames ...string) (val interface{}) {
 	return _cfg.Get2(keyPath, layerNames...)
 }
 
-func (cfg *defaultConfig) Watch2(notifier chan bool, layerNames ...string) {
+func (cfg *defaultConfig) Watch2(notifier chan struct{}, layerNames ...string) {
 	if len(layerNames) == 0 {
 		layerNames = cfg.defaultLayerNames.Load().([]string)
 	}
@@ -200,7 +200,7 @@ func (cfg *defaultConfig) Watch2(notifier chan bool, layerNames ...string) {
 	}
 }
 
-func Watch(notifier chan bool, layerNames ...string) {
+func Watch(notifier chan struct{}, layerNames ...string) {
 	_cfg.Watch2(notifier, layerNames...)
 }
 

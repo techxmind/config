@@ -16,6 +16,9 @@ import (
 
 var (
 	_asyncers sync.Map
+
+	// for mock
+	_now = time.Now
 )
 
 type AsyncerArgs struct {
@@ -41,7 +44,7 @@ type Asyncer interface {
 	ContentType(key string) ContentType
 	Get(key string) []byte
 	Set(key string, value []byte) error
-	Watch(key string) chan bool // 实时监控配置变化
+	Watch(key string) chan struct{} // 实时监控配置变化
 }
 
 // 远程配置 qconf/consul/database
@@ -65,7 +68,7 @@ func NewAsyncConfig(asyncer Asyncer, asyncKey string, cacheTime time.Duration, r
 		asyncer:      asyncer,
 		cacheTime:    cacheTime,
 		refreshAsync: refreshAsync,
-		quit:         make(chan bool),
+		quit:         make(chan struct{}),
 	}
 
 	cfg.refresh()
@@ -95,16 +98,16 @@ type asyncConfig struct {
 
 	sf singleflight.Group
 
-	notifiers []chan bool
+	notifiers []chan struct{}
 
 	asyncer      Asyncer
 	refreshAsync bool
 	refreshTime  int64
 	cacheTime    time.Duration
-	quit         chan bool
+	quit         chan struct{}
 }
 
-func (cfg *asyncConfig) watch(notify chan bool) {
+func (cfg *asyncConfig) watch(notify chan struct{}) {
 	for {
 		select {
 		case <-notify:
@@ -118,7 +121,7 @@ func (cfg *asyncConfig) watch(notify chan bool) {
 }
 
 func (cfg *asyncConfig) Get(keyPath string) interface{} {
-	now := time.Now().UnixNano()
+	now := _now().UnixNano()
 	refreshTime := atomic.LoadInt64(&cfg.refreshTime)
 	if cfg.cacheTime > 0 && time.Duration(now-refreshTime)*time.Nanosecond > cfg.cacheTime { // content expired
 		if refreshTime > 0 && cfg.refreshAsync { // if the content initialized and refreshAsync setted
@@ -144,7 +147,7 @@ func (cfg *asyncConfig) Get(keyPath string) interface{} {
 
 func (cfg *asyncConfig) refresh() {
 	cfg.sf.Do("", func() (_ interface{}, _ error) {
-		atomic.StoreInt64(&cfg.refreshTime, time.Now().UnixNano())
+		atomic.StoreInt64(&cfg.refreshTime, _now().UnixNano())
 
 		rawMessage := cfg.asyncer.Get(cfg.asyncKey)
 		rawMessage = processRawMessage(rawMessage, cfg.contentType)
@@ -215,13 +218,13 @@ func (cfg *asyncConfig) Set(keyPath string, value interface{}) error {
 func (cfg *asyncConfig) notify() {
 	for _, notifier := range cfg.notifiers {
 		select {
-		case notifier <- true:
+		case notifier <- struct{}{}:
 		default:
 		}
 	}
 }
 
-func (cfg *asyncConfig) Watch(notifier chan bool) {
+func (cfg *asyncConfig) Watch(notifier chan struct{}) {
 	cfg.Lock()
 	defer cfg.Unlock()
 	cfg.notifiers = append(cfg.notifiers, notifier)

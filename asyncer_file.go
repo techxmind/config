@@ -64,6 +64,6 @@ func (a *FileAsyncer) Set(file string, content []byte) error {
 	return fmt.Errorf("the method is not implement")
 }
 
-func (a *FileAsyncer) Watch(file string) chan bool {
+func (a *FileAsyncer) Watch(file string) chan struct{} {
 	return nil
 }

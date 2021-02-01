@@ -28,7 +28,7 @@ func NewMapConfig(m map[string]interface{}, syncMode ...bool) *MapConfig {
 
 	mc := &mapConfig{
 		syncMode:  smode,
-		notifiers: make([]chan bool, 0),
+		notifiers: make([]chan struct{}, 0),
 	}
 	mc.m.Store(m)
 
@@ -42,7 +42,7 @@ func NewMapConfig(m map[string]interface{}, syncMode ...bool) *MapConfig {
 type mapConfig struct {
 	sync.Mutex
 	syncMode  bool
-	notifiers []chan bool
+	notifiers []chan struct{}
 	m         atomic.Value //map[string]interface{}
 }
 
@@ -99,13 +99,13 @@ func (m *mapConfig) Set(keyPath string, value interface{}) error {
 func (m *mapConfig) notify() {
 	for _, notifier := range m.notifiers {
 		select {
-		case notifier <- true:
+		case notifier <- struct{}{}:
 		default:
 		}
 	}
 }
 
-func (m *mapConfig) Watch(notifier chan bool) {
+func (m *mapConfig) Watch(notifier chan struct{}) {
 	m.Lock()
 	defer m.Unlock()
 	m.notifiers = append(m.notifiers, notifier)
