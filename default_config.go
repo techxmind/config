@@ -151,6 +151,12 @@ func Layer(layerNames ...string) *LayerConfigProxy {
 	return _cfg.Layer(layerNames...)
 }
 
+// Default returns default layer config
+func Default() *LayerConfigProxy {
+	defaultNames, _ := _cfg.defaultLayerNames.Load().([]string)
+	return Layer(defaultNames...)
+}
+
 // 归还proxy对象，方便后续复用
 func (cfg *defaultConfig) PutLayer(p *LayerConfigProxy) {
 	if p != nil {
