@@ -8,6 +8,7 @@ type Configer interface {
 
 type Config interface {
 	Configer
+	Exist(keyPath string) bool
 	JSON(keyPath string) ([]byte, error)
 	Remarshal(keyPath string, v interface{}) error
 	Dump(keyPath string)

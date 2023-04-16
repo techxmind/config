@@ -4,6 +4,7 @@ import (
 	"flag"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -122,8 +123,7 @@ func init() {
 }
 
 // initWithRedis load config from redis and set it to default layer
-//
-func initWithRedis(redisOpts *redis.Options, channel string, defaultKey string, cacheTime time.Duration, refreshAsync bool) {
+func initWithRedis(redisOpts *redis.Options, channel string, defaultKeys string, cacheTime time.Duration, refreshAsync bool) {
 	DefaultRedisAsyncer = NewRedisAsyncer(redisOpts, channel)
 
 	RegisterAsyner("redis", &AsyncerArgs{
@@ -132,42 +132,45 @@ func initWithRedis(redisOpts *redis.Options, channel string, defaultKey string, 
 		RefreshAsync: refreshAsync,
 	})
 
-	if defaultKey == "" {
+	if defaultKeys == "" {
 		return
 	}
 
-	redisCfg := NewAsyncConfig(
-		DefaultRedisAsyncer,
-		defaultKey,
-		cacheTime,
-		refreshAsync,
-	)
+	for i, key := range strings.Split(defaultKeys, ",") {
+		redisCfg := NewAsyncConfig(
+			DefaultRedisAsyncer,
+			key,
+			cacheTime,
+			refreshAsync,
+		)
 
-	layerName := "default-conf-redis"
-	_cfg.AddLayer(layerName, redisCfg)
-	AddDefaultLayerName(layerName)
+		layerName := "default-conf-redis-" + strconv.Itoa(i)
+		_cfg.AddLayer(layerName, redisCfg)
+		AddDefaultLayerName(layerName)
+	}
 }
 
 // initConfFromFile load config from file and set it to default layer
-//
-func initWithFile(file string, alive bool, cacheTime time.Duration, refreshAsync bool) {
-	if file == "" {
+func initWithFile(files string, alive bool, cacheTime time.Duration, refreshAsync bool) {
+	if files == "" {
 		logger.Errorf("conf file unspecified")
 		return
 	}
 
-	if !fileutil.Exist(file) {
-		logger.Fatalf("conf file[%s] not found", file)
-	}
+	for i, file := range strings.Split(files, ",") {
+		if !fileutil.Exist(file) {
+			logger.Fatalf("conf file[%s] not found", file)
+		}
 
-	fileCfg := NewAsyncConfig(NewFileAsyncer(), file, cacheTime, refreshAsync)
+		fileCfg := NewAsyncConfig(NewFileAsyncer(), file, cacheTime, refreshAsync)
 
-	if !alive {
-		// 静态配置文件，直接合并至默认层，提高配置查询的性能
-		_cfg.Merge(fileCfg.Get(RootKey))
-	} else {
-		layerName := "default-conf-file"
-		_cfg.AddLayer(layerName, fileCfg)
-		AddDefaultLayerName(layerName)
+		if !alive {
+			// 静态配置文件，直接合并至默认层，提高配置查询的性能
+			_cfg.Merge(fileCfg.Get(RootKey))
+		} else {
+			layerName := "default-conf-file-" + strconv.Itoa(i)
+			_cfg.AddLayer(layerName, fileCfg)
+			AddDefaultLayerName(layerName)
+		}
 	}
 }
