@@ -137,10 +137,9 @@ func RemoveLayer(layerName string) {
 
 // 获取Layer访问的代理对象
 //
-//  layer := cfg.Layer("layer1", "layer2")
-//  layer.String("config_keyPath_from_layer1_or_layer2")
-//  //等价于上面的调用 cfg.String("config_keyPath_from_layer1_or_layer2", "layer1", "layer2")
-//
+//	layer := cfg.Layer("layer1", "layer2")
+//	layer.String("config_keyPath_from_layer1_or_layer2")
+//	//等价于上面的调用 cfg.String("config_keyPath_from_layer1_or_layer2", "layer1", "layer2")
 func (cfg *defaultConfig) Layer(layerNames ...string) *LayerConfigProxy {
 	proxy := cfg.proxyPool.Get().(*LayerConfigProxy)
 	proxy.SetLayerNames(layerNames...)
@@ -170,9 +169,8 @@ func PutLayer(p *LayerConfigProxy) {
 
 // 从指定的Layer中获取配置值，未指定LayerNames，默认为DefaultLayerNames
 //
-//  cfg.Get2("service_url") // Same of cfg.Get("service_url", DefaultLayerName)
-//  cfg.Get2("service_url", DefaultLayerName, "billing") // 尝试依次从默认配置，"billing"配置中查询service_url的配置
-//
+//	cfg.Get2("service_url") // Same of cfg.Get("service_url", DefaultLayerName)
+//	cfg.Get2("service_url", DefaultLayerName, "billing") // 尝试依次从默认配置，"billing"配置中查询service_url的配置
 func (cfg *defaultConfig) Get2(keyPath string, layerNames ...string) (val interface{}) {
 	if len(layerNames) == 0 {
 		layerNames = cfg.defaultLayerNames.Load().([]string)
@@ -213,13 +211,12 @@ func Watch(notifier chan struct{}, layerNames ...string) {
 // 设置指定Layer的配置，LayerNames不传默认为DefaultLayerName
 // 性能较低(359913 ns/op)：每次调会clone一个新的副本，并在副本上更新，替换原配置map
 //
-//  cfg.Set("db.host", "example.com")
-//  cfg.Set(RootKey, map[string]interface{}{
-//    "db" : map[string]interface{}{
-//      "host" : "example.com",
-//     },
-//  })
-//
+//	cfg.Set("db.host", "example.com")
+//	cfg.Set(RootKey, map[string]interface{}{
+//	  "db" : map[string]interface{}{
+//	    "host" : "example.com",
+//	   },
+//	})
 func (cfg *defaultConfig) Set2(keyPath string, value interface{}, layerNames ...string) error {
 
 	if value == nil {
@@ -253,6 +250,12 @@ func Map(keyPath string, layerNames ...string) *MapConfig {
 	p := _cfg.Layer(layerNames...)
 	defer _cfg.PutLayer(p)
 	return p.Map(keyPath)
+}
+
+func Exist(keyPath string, layerNames ...string) bool {
+	p := _cfg.Layer(layerNames...)
+	defer _cfg.PutLayer(p)
+	return p.Exist(keyPath)
 }
 
 func JSON(keyPath string, layerNames ...string) ([]byte, error) {
